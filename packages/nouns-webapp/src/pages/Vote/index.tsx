@@ -13,7 +13,7 @@ import {
   useProposal,
   useProposalVersions,
   useQueueProposal,
-  useIsForkActive
+  useIsForkActive,
 } from '../../wrappers/nounsDao';
 import { useUserVotes, useUserVotesAsOfBlock } from '../../wrappers/nounToken';
 import classes from './Vote.module.css';
@@ -71,9 +71,9 @@ const getUpdatableCountdownCopy = (
   const endDate =
     proposal && timestamp && currentBlock
       ? dayjs(timestamp).add(
-        AVERAGE_BLOCK_TIME_IN_SECS * (proposal.updatePeriodEndBlock - currentBlock),
-        'seconds',
-      )
+          AVERAGE_BLOCK_TIME_IN_SECS * (proposal.updatePeriodEndBlock - currentBlock),
+          'seconds',
+        )
       : undefined;
 
   return (
@@ -130,16 +130,16 @@ const VotePage = ({
   const proposalFeedback = useProposalFeedback(id, dataFetchPollInterval);
   const hasVoted = useHasVotedOnProposal(proposal?.id);
   const forkActiveState = useIsForkActive();
-  const [isForkActive, setIsForkActive] = useState<boolean>(false);
+  const [isForkActive, setIsForkActive] = useState<boolean>(true);
   // Get and format date from data
   const timestamp = Date.now();
   const currentBlock = useBlockNumber();
   const startDate =
     proposal && timestamp && currentBlock
       ? dayjs(timestamp).add(
-        AVERAGE_BLOCK_TIME_IN_SECS * (proposal.startBlock - currentBlock),
-        'seconds',
-      )
+          AVERAGE_BLOCK_TIME_IN_SECS * (proposal.startBlock - currentBlock),
+          'seconds',
+        )
       : undefined;
 
   const endBlock =
@@ -161,9 +161,10 @@ const VotePage = ({
   const abstainPercentage = proposal && totalVotes ? (proposal.abstainCount * 100) / totalVotes : 0;
 
   // Use user votes as of the current or proposal snapshot block
-  const currentOrSnapshotBlock = useMemo(() =>
-    Math.min(proposal?.voteSnapshotBlock ?? 0, (currentBlock ? currentBlock - 1 : 0)) || undefined,
-    [proposal, currentBlock]
+  const currentOrSnapshotBlock = useMemo(
+    () =>
+      Math.min(proposal?.voteSnapshotBlock ?? 0, currentBlock ? currentBlock - 1 : 0) || undefined,
+    [proposal, currentBlock],
   );
   const userVotes = useUserVotesAsOfBlock(currentOrSnapshotBlock);
 
@@ -263,9 +264,9 @@ const VotePage = ({
     const time =
       proposal && timestamp && currentBlock
         ? dayjs(timestamp).add(
-          AVERAGE_BLOCK_TIME_IN_SECS * (proposal.objectionPeriodEndBlock! - currentBlock),
-          'seconds',
-        )
+            AVERAGE_BLOCK_TIME_IN_SECS * (proposal.objectionPeriodEndBlock! - currentBlock),
+            'seconds',
+          )
         : undefined;
     return time;
   };
@@ -451,7 +452,8 @@ const VotePage = ({
 
   useEffect(() => {
     if (
-      isDaoGteV3 && proposal &&
+      isDaoGteV3 &&
+      proposal &&
       currentBlock &&
       proposal?.objectionPeriodEndBlock > 0 &&
       currentBlock > proposal?.endBlock &&
@@ -463,10 +465,13 @@ const VotePage = ({
     }
   }, [currentBlock, proposal?.status, proposal, isDaoGteV3]);
 
-
   useEffect(() => {
     if (proposal?.status === ProposalState.QUEUED && isForkActive) {
-      setForkPeriodMessage(<p><Trans>Proposals cannot be executed during a forking period</Trans></p>);
+      setForkPeriodMessage(
+        <p>
+          <Trans>Proposals cannot be executed during a forking period</Trans>
+        </p>,
+      );
       setIsExecutable(false);
     } else if (proposal?.status === ProposalState.QUEUED && !isForkActive) {
       setIsExecutable(true);
@@ -488,6 +493,8 @@ const VotePage = ({
   const againstNouns = getNounVotes(data, 0);
   const abstainNouns = getNounVotes(data, 2);
   const isV2Prop = dqInfo.proposal.quorumCoefficient > 0;
+
+  console.log('DEBUG HERE', isExecutable, isForkActive, forkActiveState);
 
   return (
     <Section fullWidth={false} className={classes.votePage}>
@@ -611,7 +618,7 @@ const VotePage = ({
                         <div className={clsx(classes.awaitingStateChangeButton)}>
                           <Button
                             onClick={moveStateAction}
-                            disabled={isQueuePending || isExecutePending || !isExecutable}
+                            disabled={isQueuePending || isExecutePending}
                             variant="dark"
                             className={clsx(classes.transitionStateButton, classes.button)}
                           >
@@ -780,9 +787,7 @@ const VotePage = ({
                   </div>
                   <div className={classes.snapshotBlock}>
                     <span>Taken at block</span>
-                    <h3>
-                      {proposal?.voteSnapshotBlock}
-                    </h3>
+                    <h3>{proposal?.voteSnapshotBlock}</h3>
                   </div>
                 </div>
               </Card.Body>

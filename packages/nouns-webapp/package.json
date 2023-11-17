@@ -66,6 +66,7 @@
   "devDependencies": {
     "@types/bad-words": "^3.0.1",
     "@types/jest": "^26.0.15",
+    "@types/lodash.merge": "^4.6.7",
     "@types/node": "^12.0.0",
     "@types/pngjs": "^6.0.1",
     "@types/ramda": "^0.27.42",
@@ -74,8 +75,8 @@
     "@types/react-fontawesome": "^1.6.5",
     "@types/react-router-dom": "^5.1.7",
     "@types/react-transition-group": "^4.4.5",
-    "@types/lodash.merge": "^4.6.7",
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "gh-pages": "^6.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -85,7 +86,9 @@
     "prepare": "yarn i18n:compile",
     "i18n:extract": "lingui extract",
     "i18n:compile": "lingui compile",
-    "i18n:pseudo": "lingui extract --locale pseudo && lingui compile"
+    "i18n:pseudo": "lingui extract --locale pseudo && lingui compile",
+    "predeploy": "yarn build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
